@@ -103,8 +103,8 @@ class Main {
     }
  
     function setUp() {
-        var w = 320;
-        var h = 240;
+        var w = 1024;
+        var h = 600;
  
         // Create the floor for the simulation.
         //   We use a STATIC type object, and give it a single
@@ -128,9 +128,9 @@ class Main {
         //   which means we get a box whose centre is the body origin (0, 0)
         //   and that when this object rotates about its centre it will
         //   act as expected.
-        for (i in 0...16) {
+        for (i in 0...87) {
             var box = new Body(BodyType.DYNAMIC);
-            box.shapes.add(new Polygon(Polygon.box(16, 32)));
+            box.shapes.add(new Polygon(Polygon.box(16, 48)));
             box.position.setxy((w / 2), ((h - 50) - 32 * (i + 0.5)));
             box.space = space;
         }
@@ -182,28 +182,33 @@ class Main {
         if(currentBodyIndex > space.bodies.length){
             currentBodyIndex = 0;
         }
-        space.bodies.foreach(function(obj){
-            currentBodyIndex = currentBodyIndex + 1;
-            // var x = obj.bounds.x;
-            // var y = obj.bounds.y;
-            // renderLine(obj.bounds.x, obj.bounds.y, obj.bounds.x + 10, obj.bounds.y+10);
-            
-            ctx.fillStyle = '#000000';
-            ctx.lineWidth = 10;
-            ctx.beginPath();        
-            ctx.moveTo(obj.bounds.x, obj.bounds.y);
-            ctx.lineTo(obj.bounds.x + 10, obj.bounds.y + 10);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.clip();
 
-            if(currentBodyIndex == 4){
-                   // trace(x); 
+        var _ctx = ctx;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.lineWidth = 10;
+        ctx.beginPath();        
+        ctx.fillRect(0, 0, 1024, 600);
+        ctx.closePath();
+        ctx.stroke();
+
+        space.bodies.foreach(function renderObj(obj){
+            currentBodyIndex = currentBodyIndex + 1;
+                    // renderLine(obj.bounds.x, obj.bounds.y, obj.bounds.x + 10, obj.bounds.y+10);
+            
+            // trace(ctx);
+            // trace(obj.type.toString());
+            if(obj.type.toString() == 'DYNAMIC'){
+                    ctx.fillStyle = '#000000';
+                    ctx.lineWidth = 10;
+                    ctx.beginPath();
+                    // ctx.moveTo(obj.bounds.x, obj.bounds.y);        
+                    ctx.fillRect(obj.bounds.x, obj.bounds.y, obj.bounds.width, obj.bounds.height);
+                    ctx.closePath();
+                    ctx.stroke();
+                    // ctx.fillPath();
             }
             // trace(currentBodyIndex);
-            // trace(obj.posx);
-            // trace(obj.posy);
         });
         if(log == 0){
             // trace(space);
@@ -214,7 +219,7 @@ class Main {
             log = 1;
         }
         window.requestAnimationFrame(enterFrameHandler);
-        //render();
+        render();
         // Render Space to the debug draw.
         //   We first clear the debug screen,
         //   then draw the entire Space,
@@ -224,12 +229,12 @@ class Main {
         // debug.flush();
     }
 
-    // function render():Void {
-    //     window = Browser.window;
+    function render():Void {
+        window = Browser.window;
 
-    //     window.requestAnimationFrame(render);
-    //     return;
-    // };
+        // window.requestAnimationFrame(render);
+        return;
+    };
  
     function keyDownHandler(ev:KeyboardEvent):Void {
         if (ev.keyCode == 82) { // 'R'

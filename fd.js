@@ -6,31 +6,206 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var Main = function() {
+var FixedDragging = function() {
 	this.i = 0;
 	this.log = 0;
 	this.currentBodyIndex = 0;
+	this.playerBodyIndex = 70;
+	this.preserveComma = true;
 	this.document = window.document;
 	this.window = window;
 	this.document.onreadystatechange = $bind(this,this.documentOnload);
-	this.body = this.document.createElement("body");
 	this.window.requestAnimationFrame($bind(this,this.enterFrameHandler));
 	this.canvas = this.document.createElement("canvas");
+	this.canvas.style.display = "none";
 	this.canvas.width = 1024;
-	this.canvas.height = 600;
+	this.canvas.height = 700;
 	this.ctx = this.canvas.getContext("2d");
-	this.body.appendChild(this.canvas);
 	this.initialise(null);
 };
-Main.__name__ = true;
-Main.main = function() {
-	var main = new Main();
+FixedDragging.__name__ = true;
+FixedDragging.main = function() {
+	var _FixedDragging = new FixedDragging();
+	FixedDragging.instance = _FixedDragging;
 };
-Main.prototype = {
+FixedDragging.prototype = {
 	documentOnload: function(x) {
+		var debugBodiesPositionDiv = this.window.document.createElement("div");
+		debugBodiesPositionDiv.style.display = "none";
+		debugBodiesPositionDiv.id = "b_position";
+		this.window.document.children[0].children[1].appendChild(debugBodiesPositionDiv);
 		this.window.document.children[0].children[1].appendChild(this.canvas);
+		this.window.document.onkeydown = $bind(this,this.keyDownHandler);
 	}
 	,initialise: function(ev) {
+		this.space = new nape_space_Space();
+		this.setUp();
+	}
+	,setUp: function() {
+		var w = 1024;
+		var h = 700;
+		if(zpp_$nape_util_ZPP_$Flags.BodyType_STATIC == null) {
+			zpp_$nape_util_ZPP_$Flags.internal = true;
+			zpp_$nape_util_ZPP_$Flags.BodyType_STATIC = new nape_phys_BodyType();
+			zpp_$nape_util_ZPP_$Flags.internal = false;
+		}
+		var border = new nape_phys_Body(zpp_$nape_util_ZPP_$Flags.BodyType_STATIC);
+		var _this = border.zpp_inner.wrap_shapes;
+		var obj = new nape_shape_Polygon(nape_shape_Polygon.rect(0,0,w,-1));
+		if(_this.zpp_inner.reverse_flag) {
+			_this.push(obj);
+		} else {
+			_this.unshift(obj);
+		}
+		var _this1 = border.zpp_inner.wrap_shapes;
+		var obj1 = new nape_shape_Polygon(nape_shape_Polygon.rect(0,h,w,1));
+		if(_this1.zpp_inner.reverse_flag) {
+			_this1.push(obj1);
+		} else {
+			_this1.unshift(obj1);
+		}
+		var _this2 = border.zpp_inner.wrap_shapes;
+		var obj2 = new nape_shape_Polygon(nape_shape_Polygon.rect(0,0,-1,h));
+		if(_this2.zpp_inner.reverse_flag) {
+			_this2.push(obj2);
+		} else {
+			_this2.unshift(obj2);
+		}
+		var _this3 = border.zpp_inner.wrap_shapes;
+		var obj3 = new nape_shape_Polygon(nape_shape_Polygon.rect(w,0,1,h));
+		if(_this3.zpp_inner.reverse_flag) {
+			_this3.push(obj3);
+		} else {
+			_this3.unshift(obj3);
+		}
+		var space = this.space;
+		if(border.zpp_inner.compound != null) {
+			throw new js__$Boot_HaxeError("Error: Cannot set the space of a Body belonging to a Compound, only the root Compound space can be set");
+		}
+		border.zpp_inner.immutable_midstep("Body::space");
+		if(border.zpp_inner.world) {
+			throw new js__$Boot_HaxeError("Error: Space::world is immutable");
+		}
+		if((border.zpp_inner.space == null ? null : border.zpp_inner.space.outer) != space) {
+			if((border.zpp_inner.space == null ? null : border.zpp_inner.space.outer) != null) {
+				border.zpp_inner.component.woken = false;
+			}
+			if((border.zpp_inner.space == null ? null : border.zpp_inner.space.outer) != null) {
+				(border.zpp_inner.space == null ? null : border.zpp_inner.space.outer).zpp_inner.wrap_bodies.remove(border);
+			}
+			if(space != null) {
+				var _this4 = space.zpp_inner.wrap_bodies;
+				if(_this4.zpp_inner.reverse_flag) {
+					_this4.push(border);
+				} else {
+					_this4.unshift(border);
+				}
+			}
+		}
+		var tmp = border.zpp_inner.space == null;
+		var _g = 0;
+		while(_g < 50) {
+			var i = _g++;
+			var body = new nape_phys_Body();
+			if(Math.random() < 0.33) {
+				var _this5 = body.zpp_inner.wrap_shapes;
+				var obj4 = new nape_shape_Circle(20);
+				if(_this5.zpp_inner.reverse_flag) {
+					_this5.push(obj4);
+				} else {
+					_this5.unshift(obj4);
+				}
+			} else if(Math.random() < 0.5) {
+				var _this6 = body.zpp_inner.wrap_shapes;
+				var obj5 = new nape_shape_Polygon(nape_shape_Polygon.box(40,40));
+				if(_this6.zpp_inner.reverse_flag) {
+					_this6.push(obj5);
+				} else {
+					_this6.unshift(obj5);
+				}
+			} else {
+				var _this7 = body.zpp_inner.wrap_shapes;
+				var obj6 = new nape_shape_Polygon(nape_shape_Polygon.regular(20,20,5));
+				if(_this7.zpp_inner.reverse_flag) {
+					_this7.push(obj6);
+				} else {
+					_this7.unshift(obj6);
+				}
+			}
+			if(body.zpp_inner.wrap_pos == null) {
+				body.zpp_inner.setupPosition();
+			}
+			var _this8 = body.zpp_inner.wrap_pos;
+			var x = Math.random() * w;
+			var y = Math.random() * h;
+			if(_this8 != null && _this8.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this9 = _this8.zpp_inner;
+			if(_this9._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this9._isimmutable != null) {
+				_this9._isimmutable();
+			}
+			if(x != x || y != y) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp1;
+			if(_this8 != null && _this8.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this10 = _this8.zpp_inner;
+			if(_this10._validate != null) {
+				_this10._validate();
+			}
+			if(_this8.zpp_inner.x == x) {
+				if(_this8 != null && _this8.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this11 = _this8.zpp_inner;
+				if(_this11._validate != null) {
+					_this11._validate();
+				}
+				tmp1 = _this8.zpp_inner.y == y;
+			} else {
+				tmp1 = false;
+			}
+			if(!tmp1) {
+				_this8.zpp_inner.x = x;
+				_this8.zpp_inner.y = y;
+				var _this12 = _this8.zpp_inner;
+				if(_this12._invalidate != null) {
+					_this12._invalidate(_this12);
+				}
+			}
+			var space1 = this.space;
+			if(body.zpp_inner.compound != null) {
+				throw new js__$Boot_HaxeError("Error: Cannot set the space of a Body belonging to a Compound, only the root Compound space can be set");
+			}
+			body.zpp_inner.immutable_midstep("Body::space");
+			if(body.zpp_inner.world) {
+				throw new js__$Boot_HaxeError("Error: Space::world is immutable");
+			}
+			if((body.zpp_inner.space == null ? null : body.zpp_inner.space.outer) != space1) {
+				if((body.zpp_inner.space == null ? null : body.zpp_inner.space.outer) != null) {
+					body.zpp_inner.component.woken = false;
+				}
+				if((body.zpp_inner.space == null ? null : body.zpp_inner.space.outer) != null) {
+					(body.zpp_inner.space == null ? null : body.zpp_inner.space.outer).zpp_inner.wrap_bodies.remove(body);
+				}
+				if(space1 != null) {
+					var _this13 = space1.zpp_inner.wrap_bodies;
+					if(_this13.zpp_inner.reverse_flag) {
+						_this13.push(body);
+					} else {
+						_this13.unshift(body);
+					}
+				}
+			}
+			var tmp2 = body.zpp_inner.space == null;
+		}
+		var tmp3 = this.space.zpp_inner.__static;
 		var ret;
 		if(zpp_$nape_util_ZPP_$PubPool.poolVec2 == null) {
 			ret = new nape_geom_Vec2();
@@ -55,376 +230,292 @@ Main.prototype = {
 			ret1.weak = false;
 			ret1._immutable = false;
 			ret1.x = 0;
-			ret1.y = 600;
+			ret1.y = 0;
 			ret.zpp_inner = ret1;
 			ret.zpp_inner.outer = ret;
 		} else {
 			if(ret != null && ret.zpp_disp) {
 				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 			}
-			var _this = ret.zpp_inner;
-			if(_this._immutable) {
+			var _this14 = ret.zpp_inner;
+			if(_this14._immutable) {
 				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
 			}
-			if(_this._isimmutable != null) {
-				_this._isimmutable();
+			if(_this14._isimmutable != null) {
+				_this14._isimmutable();
 			}
-			var tmp;
+			var tmp4;
 			if(ret != null && ret.zpp_disp) {
 				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 			}
-			var _this1 = ret.zpp_inner;
-			if(_this1._validate != null) {
-				_this1._validate();
+			var _this15 = ret.zpp_inner;
+			if(_this15._validate != null) {
+				_this15._validate();
 			}
 			if(ret.zpp_inner.x == 0) {
 				if(ret != null && ret.zpp_disp) {
 					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 				}
-				var _this2 = ret.zpp_inner;
-				if(_this2._validate != null) {
-					_this2._validate();
+				var _this16 = ret.zpp_inner;
+				if(_this16._validate != null) {
+					_this16._validate();
 				}
-				tmp = ret.zpp_inner.y == 600;
+				tmp4 = ret.zpp_inner.y == 0;
 			} else {
-				tmp = false;
+				tmp4 = false;
 			}
-			if(!tmp) {
+			if(!tmp4) {
 				ret.zpp_inner.x = 0;
-				ret.zpp_inner.y = 600;
-				var _this3 = ret.zpp_inner;
-				if(_this3._invalidate != null) {
-					_this3._invalidate(_this3);
+				ret.zpp_inner.y = 0;
+				var _this17 = ret.zpp_inner;
+				if(_this17._invalidate != null) {
+					_this17._invalidate(_this17);
 				}
 			}
 		}
 		ret.zpp_inner.weak = true;
-		var gravity = ret;
-		this.space = new nape_space_Space(gravity);
-		this.setUp();
-	}
-	,setUp: function() {
-		var w = 1024;
-		var h = 600;
-		if(zpp_$nape_util_ZPP_$Flags.BodyType_STATIC == null) {
-			zpp_$nape_util_ZPP_$Flags.internal = true;
-			zpp_$nape_util_ZPP_$Flags.BodyType_STATIC = new nape_phys_BodyType();
-			zpp_$nape_util_ZPP_$Flags.internal = false;
-		}
-		var floor = new nape_phys_Body(zpp_$nape_util_ZPP_$Flags.BodyType_STATIC);
-		var _this = floor.zpp_inner.wrap_shapes;
-		var obj = new nape_shape_Polygon(nape_shape_Polygon.rect(50,h - 50,w - 100,1));
-		if(_this.zpp_inner.reverse_flag) {
-			_this.push(obj);
+		var ret2;
+		if(zpp_$nape_util_ZPP_$PubPool.poolVec2 == null) {
+			ret2 = new nape_geom_Vec2();
 		} else {
-			_this.unshift(obj);
-		}
-		var space = this.space;
-		if(floor.zpp_inner.compound != null) {
-			throw new js__$Boot_HaxeError("Error: Cannot set the space of a Body belonging to a Compound, only the root Compound space can be set");
-		}
-		floor.zpp_inner.immutable_midstep("Body::space");
-		if(floor.zpp_inner.world) {
-			throw new js__$Boot_HaxeError("Error: Space::world is immutable");
-		}
-		if((floor.zpp_inner.space == null ? null : floor.zpp_inner.space.outer) != space) {
-			if((floor.zpp_inner.space == null ? null : floor.zpp_inner.space.outer) != null) {
-				floor.zpp_inner.component.woken = false;
+			ret2 = zpp_$nape_util_ZPP_$PubPool.poolVec2;
+			zpp_$nape_util_ZPP_$PubPool.poolVec2 = ret2.zpp_pool;
+			ret2.zpp_pool = null;
+			ret2.zpp_disp = false;
+			if(ret2 == zpp_$nape_util_ZPP_$PubPool.nextVec2) {
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = null;
 			}
-			if((floor.zpp_inner.space == null ? null : floor.zpp_inner.space.outer) != null) {
-				(floor.zpp_inner.space == null ? null : floor.zpp_inner.space.outer).zpp_inner.wrap_bodies.remove(floor);
+		}
+		if(ret2.zpp_inner == null) {
+			var ret3;
+			if(zpp_$nape_geom_ZPP_$Vec2.zpp_pool == null) {
+				ret3 = new zpp_$nape_geom_ZPP_$Vec2();
+			} else {
+				ret3 = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = ret3.next;
+				ret3.next = null;
 			}
-			if(space != null) {
-				var _this1 = space.zpp_inner.wrap_bodies;
-				if(_this1.zpp_inner.reverse_flag) {
-					_this1.push(floor);
-				} else {
-					_this1.unshift(floor);
+			ret3.weak = false;
+			ret3._immutable = false;
+			ret3.x = 0;
+			ret3.y = 0;
+			ret2.zpp_inner = ret3;
+			ret2.zpp_inner.outer = ret2;
+		} else {
+			if(ret2 != null && ret2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this18 = ret2.zpp_inner;
+			if(_this18._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this18._isimmutable != null) {
+				_this18._isimmutable();
+			}
+			var tmp5;
+			if(ret2 != null && ret2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this19 = ret2.zpp_inner;
+			if(_this19._validate != null) {
+				_this19._validate();
+			}
+			if(ret2.zpp_inner.x == 0) {
+				if(ret2 != null && ret2.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this20 = ret2.zpp_inner;
+				if(_this20._validate != null) {
+					_this20._validate();
+				}
+				tmp5 = ret2.zpp_inner.y == 0;
+			} else {
+				tmp5 = false;
+			}
+			if(!tmp5) {
+				ret2.zpp_inner.x = 0;
+				ret2.zpp_inner.y = 0;
+				var _this21 = ret2.zpp_inner;
+				if(_this21._invalidate != null) {
+					_this21._invalidate(_this21);
 				}
 			}
 		}
-		var tmp = floor.zpp_inner.space == null;
-		var _g = 0;
-		while(_g < 87) {
-			var i = _g++;
-			if(zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC == null) {
-				zpp_$nape_util_ZPP_$Flags.internal = true;
-				zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC = new nape_phys_BodyType();
-				zpp_$nape_util_ZPP_$Flags.internal = false;
+		ret2.zpp_inner.weak = true;
+		this.handJoint = new nape_constraint_PivotJoint(tmp3,null,ret,ret2);
+		var _this22 = this.handJoint;
+		var space2 = this.space;
+		if(_this22.zpp_inner.compound != null) {
+			throw new js__$Boot_HaxeError("Error: Cannot set the space of a Constraint belonging to" + " a Compound, only the root Compound space can be set");
+		}
+		if((_this22.zpp_inner.space == null ? null : _this22.zpp_inner.space.outer) != space2) {
+			if(_this22.zpp_inner.component != null) {
+				_this22.zpp_inner.component.woken = false;
 			}
-			var box = new nape_phys_Body(zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC);
-			var _this2 = box.zpp_inner.wrap_shapes;
-			var obj1 = new nape_shape_Polygon(nape_shape_Polygon.box(16,48));
-			if(_this2.zpp_inner.reverse_flag) {
-				_this2.push(obj1);
+			_this22.zpp_inner.clearcache();
+			if(_this22.zpp_inner.space != null) {
+				_this22.zpp_inner.space.outer.zpp_inner.wrap_constraints.remove(_this22);
+			}
+			if(space2 != null) {
+				var _this23 = space2.zpp_inner.wrap_constraints;
+				if(_this23.zpp_inner.reverse_flag) {
+					_this23.push(_this22);
+				} else {
+					_this23.unshift(_this22);
+				}
 			} else {
-				_this2.unshift(obj1);
+				_this22.zpp_inner.space = null;
 			}
-			if(box.zpp_inner.wrap_pos == null) {
-				box.zpp_inner.setupPosition();
+		}
+		var tmp6 = _this22.zpp_inner.space == null;
+		var _this24 = this.handJoint;
+		if(_this24.zpp_inner.active != false) {
+			if(_this24.zpp_inner.component != null) {
+				_this24.zpp_inner.component.woken = false;
 			}
-			var _this3 = box.zpp_inner.wrap_pos;
-			var x = w / 2;
-			var y = h - 50 - 32 * (i + 0.5);
-			if(_this3 != null && _this3.zpp_disp) {
+			_this24.zpp_inner.clearcache();
+			if(_this24.zpp_inner.space != null) {
+				_this24.zpp_inner.wake();
+				_this24.zpp_inner.space.live_constraints.remove(_this24.zpp_inner);
+			}
+			_this24.zpp_inner.active = false;
+			_this24.zpp_inner.deactivate();
+		}
+		var _this25 = this.handJoint;
+		if(_this25.zpp_inner.stiff != false) {
+			_this25.zpp_inner.stiff = false;
+			_this25.zpp_inner.wake();
+		}
+		this.prevTimeMS = new Date().getTime() / 1000 * 1000 | 0;
+		this.window.requestAnimationFrame($bind(this,this.enterFrameHandler));
+		this.simulationTime = 0.0;
+	}
+	,enterFrameHandler: function(ev) {
+		var _gthis = this;
+		var positionDiv = this.window.document.getElementById("b_position");
+		this.debugBodiesPosition = "{ \"bodies\" : [";
+		if(this.handJoint.zpp_inner.active) {
+			var _this = this.handJoint;
+			if(_this.zpp_inner_zn.wrap_a1 == null) {
+				_this.zpp_inner_zn.setup_a1();
+			}
+			var _this1 = _this.zpp_inner_zn.wrap_a1;
+			var x = this.mouseX;
+			var y = this.mouseY;
+			if(_this1 != null && _this1.zpp_disp) {
 				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 			}
-			var _this4 = _this3.zpp_inner;
-			if(_this4._immutable) {
+			var _this2 = _this1.zpp_inner;
+			if(_this2._immutable) {
 				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
 			}
-			if(_this4._isimmutable != null) {
-				_this4._isimmutable();
+			if(_this2._isimmutable != null) {
+				_this2._isimmutable();
 			}
 			if(x != x || y != y) {
 				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
 			}
-			var tmp1;
-			if(_this3 != null && _this3.zpp_disp) {
+			var tmp;
+			if(_this1 != null && _this1.zpp_disp) {
 				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 			}
-			var _this5 = _this3.zpp_inner;
-			if(_this5._validate != null) {
-				_this5._validate();
+			var _this3 = _this1.zpp_inner;
+			if(_this3._validate != null) {
+				_this3._validate();
 			}
-			if(_this3.zpp_inner.x == x) {
-				if(_this3 != null && _this3.zpp_disp) {
+			if(_this1.zpp_inner.x == x) {
+				if(_this1 != null && _this1.zpp_disp) {
 					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
 				}
-				var _this6 = _this3.zpp_inner;
-				if(_this6._validate != null) {
-					_this6._validate();
+				var _this4 = _this1.zpp_inner;
+				if(_this4._validate != null) {
+					_this4._validate();
 				}
-				tmp1 = _this3.zpp_inner.y == y;
+				tmp = _this1.zpp_inner.y == y;
 			} else {
-				tmp1 = false;
+				tmp = false;
 			}
-			if(!tmp1) {
-				_this3.zpp_inner.x = x;
-				_this3.zpp_inner.y = y;
-				var _this7 = _this3.zpp_inner;
-				if(_this7._invalidate != null) {
-					_this7._invalidate(_this7);
-				}
-			}
-			var space1 = this.space;
-			if(box.zpp_inner.compound != null) {
-				throw new js__$Boot_HaxeError("Error: Cannot set the space of a Body belonging to a Compound, only the root Compound space can be set");
-			}
-			box.zpp_inner.immutable_midstep("Body::space");
-			if(box.zpp_inner.world) {
-				throw new js__$Boot_HaxeError("Error: Space::world is immutable");
-			}
-			if((box.zpp_inner.space == null ? null : box.zpp_inner.space.outer) != space1) {
-				if((box.zpp_inner.space == null ? null : box.zpp_inner.space.outer) != null) {
-					box.zpp_inner.component.woken = false;
-				}
-				if((box.zpp_inner.space == null ? null : box.zpp_inner.space.outer) != null) {
-					(box.zpp_inner.space == null ? null : box.zpp_inner.space.outer).zpp_inner.wrap_bodies.remove(box);
-				}
-				if(space1 != null) {
-					var _this8 = space1.zpp_inner.wrap_bodies;
-					if(_this8.zpp_inner.reverse_flag) {
-						_this8.push(box);
-					} else {
-						_this8.unshift(box);
-					}
-				}
-			}
-			var tmp2 = box.zpp_inner.space == null;
-		}
-		if(zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC == null) {
-			zpp_$nape_util_ZPP_$Flags.internal = true;
-			zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC = new nape_phys_BodyType();
-			zpp_$nape_util_ZPP_$Flags.internal = false;
-		}
-		var ball = new nape_phys_Body(zpp_$nape_util_ZPP_$Flags.BodyType_DYNAMIC);
-		var _this9 = ball.zpp_inner.wrap_shapes;
-		var obj2 = new nape_shape_Circle(50);
-		if(_this9.zpp_inner.reverse_flag) {
-			_this9.push(obj2);
-		} else {
-			_this9.unshift(obj2);
-		}
-		if(ball.zpp_inner.wrap_pos == null) {
-			ball.zpp_inner.setupPosition();
-		}
-		var _this10 = ball.zpp_inner.wrap_pos;
-		var y1 = h / 2;
-		if(_this10 != null && _this10.zpp_disp) {
-			throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
-		}
-		var _this11 = _this10.zpp_inner;
-		if(_this11._immutable) {
-			throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
-		}
-		if(_this11._isimmutable != null) {
-			_this11._isimmutable();
-		}
-		if(y1 != y1) {
-			throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
-		}
-		var tmp3;
-		if(_this10 != null && _this10.zpp_disp) {
-			throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
-		}
-		var _this12 = _this10.zpp_inner;
-		if(_this12._validate != null) {
-			_this12._validate();
-		}
-		if(_this10.zpp_inner.x == 50) {
-			if(_this10 != null && _this10.zpp_disp) {
-				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
-			}
-			var _this13 = _this10.zpp_inner;
-			if(_this13._validate != null) {
-				_this13._validate();
-			}
-			tmp3 = _this10.zpp_inner.y == y1;
-		} else {
-			tmp3 = false;
-		}
-		if(!tmp3) {
-			_this10.zpp_inner.x = 50;
-			_this10.zpp_inner.y = y1;
-			var _this14 = _this10.zpp_inner;
-			if(_this14._invalidate != null) {
-				_this14._invalidate(_this14);
-			}
-		}
-		if(ball.zpp_inner.world) {
-			throw new js__$Boot_HaxeError("Error: Space::world is immutable");
-		}
-		if(ball.zpp_inner.angvel != 10) {
-			if(ball.zpp_inner.type == 1) {
-				throw new js__$Boot_HaxeError("Error: A static object cannot be given a velocity");
-			}
-			ball.zpp_inner.angvel = 10;
-			ball.zpp_inner.wake();
-		}
-		var space2 = this.space;
-		if(ball.zpp_inner.compound != null) {
-			throw new js__$Boot_HaxeError("Error: Cannot set the space of a Body belonging to a Compound, only the root Compound space can be set");
-		}
-		ball.zpp_inner.immutable_midstep("Body::space");
-		if(ball.zpp_inner.world) {
-			throw new js__$Boot_HaxeError("Error: Space::world is immutable");
-		}
-		if((ball.zpp_inner.space == null ? null : ball.zpp_inner.space.outer) != space2) {
-			if((ball.zpp_inner.space == null ? null : ball.zpp_inner.space.outer) != null) {
-				ball.zpp_inner.component.woken = false;
-			}
-			if((ball.zpp_inner.space == null ? null : ball.zpp_inner.space.outer) != null) {
-				(ball.zpp_inner.space == null ? null : ball.zpp_inner.space.outer).zpp_inner.wrap_bodies.remove(ball);
-			}
-			if(space2 != null) {
-				var _this15 = space2.zpp_inner.wrap_bodies;
-				if(_this15.zpp_inner.reverse_flag) {
-					_this15.push(ball);
-				} else {
-					_this15.unshift(ball);
+			if(!tmp) {
+				_this1.zpp_inner.x = x;
+				_this1.zpp_inner.y = y;
+				var _this5 = _this1.zpp_inner;
+				if(_this5._invalidate != null) {
+					_this5._invalidate(_this5);
 				}
 			}
 		}
-		var tmp4 = ball.zpp_inner.space == null;
-	}
-	,renderLine: function(x1,y1,x2,y2) {
-		this.ctx.fillStyle = "#000000";
-		this.ctx.lineWidth = 10;
-		this.ctx.beginPath();
-		this.ctx.moveTo(x1,y1);
-		this.ctx.lineTo(x2,y2);
-		this.ctx.closePath();
-		this.ctx.fill();
-		this.ctx.stroke();
-		this.ctx.clip();
-	}
-	,enterFrameHandler: function(ev) {
-		var _gthis = this;
-		this.space.step(0.0166666666666666664);
+		this.space.step(0.1);
 		this.i += 1;
-		var tmp = this.currentBodyIndex;
-		var _this = this.space.zpp_inner.wrap_bodies;
-		_this.zpp_inner.valmod();
-		if(_this.zpp_inner.zip_length) {
-			_this.zpp_inner.zip_length = false;
-			_this.zpp_inner.user_length = _this.zpp_inner.inner.length;
-		}
-		if(tmp > _this.zpp_inner.user_length) {
-			this.currentBodyIndex = 0;
-		}
 		var _ctx = this.ctx;
 		this.ctx.fillStyle = "#FFFFFF";
 		this.ctx.lineWidth = 10;
 		this.ctx.beginPath();
-		this.ctx.fillRect(0,0,1024,600);
+		this.ctx.fillRect(0,0,1024,700);
 		this.ctx.closePath();
 		this.ctx.stroke();
-		var _this1 = this.space.zpp_inner.wrap_bodies;
+		this.currentBodyIndex = 0;
+		var _this6 = this.space.zpp_inner.wrap_bodies;
 		var renderObj = function(obj) {
-			_gthis.currentBodyIndex += 1;
-			if(zpp_$nape_phys_ZPP_$Body.types[obj.zpp_inner.type].toString() == "DYNAMIC") {
-				_gthis.ctx.fillStyle = "#000000";
-				_gthis.ctx.lineWidth = 10;
-				_gthis.ctx.beginPath();
-				var _gthis1 = _gthis.ctx;
-				if(obj.zpp_inner.world) {
-					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
-				}
-				var _this2 = obj.zpp_inner.aabb.wrapper();
-				var _this3 = _this2.zpp_inner;
-				if(_this3._validate != null) {
-					_this3._validate();
-				}
-				var renderObj1 = _this2.zpp_inner.minx;
-				if(obj.zpp_inner.world) {
-					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
-				}
-				var _this4 = obj.zpp_inner.aabb.wrapper();
-				var _this5 = _this4.zpp_inner;
-				if(_this5._validate != null) {
-					_this5._validate();
-				}
-				var renderObj2 = _this4.zpp_inner.miny;
-				if(obj.zpp_inner.world) {
-					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
-				}
-				var _this6 = obj.zpp_inner.aabb.wrapper();
-				var _this7 = _this6.zpp_inner;
-				if(_this7._validate != null) {
-					_this7._validate();
-				}
-				var _this8 = _this6.zpp_inner;
-				var renderObj3 = _this8.maxx - _this8.minx;
-				if(obj.zpp_inner.world) {
-					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
-				}
-				var _this9 = obj.zpp_inner.aabb.wrapper();
-				var _this10 = _this9.zpp_inner;
-				if(_this10._validate != null) {
-					_this10._validate();
-				}
-				var _this11 = _this9.zpp_inner;
-				_gthis1.fillRect(renderObj1,renderObj2,renderObj3,_this11.maxy - _this11.miny);
-				_gthis.ctx.closePath();
-				_gthis.ctx.stroke();
+			var _gthis1 = _gthis.currentBodyIndex += 1;
+			var _this7 = _gthis.space.zpp_inner.wrap_bodies;
+			_this7.zpp_inner.valmod();
+			if(_this7.zpp_inner.zip_length) {
+				_this7.zpp_inner.zip_length = false;
+				_this7.zpp_inner.user_length = _this7.zpp_inner.inner.length;
 			}
+			if(_gthis1 > _this7.zpp_inner.user_length) {
+				_gthis.currentBodyIndex = 0;
+			}
+			_gthis.preserveComma = true;
+			var _gthis2 = _gthis.currentBodyIndex;
+			var _this8 = _gthis.space.zpp_inner.wrap_bodies;
+			_this8.zpp_inner.valmod();
+			if(_this8.zpp_inner.zip_length) {
+				_this8.zpp_inner.zip_length = false;
+				_this8.zpp_inner.user_length = _this8.zpp_inner.inner.length;
+			}
+			if(_gthis2 == _this8.zpp_inner.user_length) {
+				_gthis.preserveComma = false;
+			}
+			var comma = "";
+			if(_gthis.preserveComma) {
+				comma = " , ";
+			}
+			var renderObj1 = _gthis.debugBodiesPosition + " [ ";
+			if(obj.zpp_inner.world) {
+				throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+			}
+			var _this9 = obj.zpp_inner.aabb.wrapper();
+			var _this10 = _this9.zpp_inner;
+			if(_this10._validate != null) {
+				_this10._validate();
+			}
+			var renderObj2 = renderObj1 + _this9.zpp_inner.minx + " , ";
+			if(obj.zpp_inner.world) {
+				throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+			}
+			var _this11 = obj.zpp_inner.aabb.wrapper();
+			var _this12 = _this11.zpp_inner;
+			if(_this12._validate != null) {
+				_this12._validate();
+			}
+			_gthis.debugBodiesPosition = renderObj2 + _this11.zpp_inner.miny + " ] " + comma + "";
 		};
 		var lambda = renderObj;
 		if(lambda == null) {
 			throw new js__$Boot_HaxeError("Error: Cannot execute null on list elements");
 		}
-		_this1.zpp_inner.valmod();
-		var it = nape_phys_BodyIterator.get(_this1);
+		_this6.zpp_inner.valmod();
+		var it = nape_phys_BodyIterator.get(_this6);
 		while(true) {
 			it.zpp_inner.zpp_inner.valmod();
-			var _this12 = it.zpp_inner;
-			_this12.zpp_inner.valmod();
-			if(_this12.zpp_inner.zip_length) {
-				_this12.zpp_inner.zip_length = false;
-				_this12.zpp_inner.user_length = _this12.zpp_inner.inner.length;
+			var _this13 = it.zpp_inner;
+			_this13.zpp_inner.valmod();
+			if(_this13.zpp_inner.zip_length) {
+				_this13.zpp_inner.zip_length = false;
+				_this13.zpp_inner.user_length = _this13.zpp_inner.inner.length;
 			}
-			var length = _this12.zpp_inner.user_length;
+			var length = _this13.zpp_inner.user_length;
 			it.zpp_critical = true;
 			var tmp1;
 			if(it.zpp_i < length) {
@@ -449,18 +540,18 @@ Main.prototype = {
 			}
 		}
 		if(this.log == 0) {
-			var _this13 = this.space.zpp_inner.wrap_bodies;
-			_this13.zpp_inner.valmod();
-			var it1 = nape_phys_BodyIterator.get(_this13);
+			var _this14 = this.space.zpp_inner.wrap_bodies;
+			_this14.zpp_inner.valmod();
+			var it1 = nape_phys_BodyIterator.get(_this14);
 			while(true) {
 				it1.zpp_inner.zpp_inner.valmod();
-				var _this14 = it1.zpp_inner;
-				_this14.zpp_inner.valmod();
-				if(_this14.zpp_inner.zip_length) {
-					_this14.zpp_inner.zip_length = false;
-					_this14.zpp_inner.user_length = _this14.zpp_inner.inner.length;
+				var _this15 = it1.zpp_inner;
+				_this15.zpp_inner.valmod();
+				if(_this15.zpp_inner.zip_length) {
+					_this15.zpp_inner.zip_length = false;
+					_this15.zpp_inner.user_length = _this15.zpp_inner.inner.length;
 				}
-				var length1 = _this14.zpp_inner.user_length;
+				var length1 = _this15.zpp_inner.user_length;
 				it1.zpp_critical = true;
 				var tmp2;
 				if(it1.zpp_i < length1) {
@@ -486,20 +577,776 @@ Main.prototype = {
 			}
 			this.log = 1;
 		}
+		positionDiv.textContent = this.debugBodiesPosition + "]}";
 		this.window.requestAnimationFrame($bind(this,this.enterFrameHandler));
-		this.render();
 	}
-	,render: function() {
-		this.window = window;
-		return;
+	,mouseDownHandler: function(ev) {
+		var mousePoint = new nape_geom_Vec2(ev.screenX,ev.screenY);
+		var _this = this.space.bodiesUnderPoint(mousePoint);
+		_this.zpp_inner.valmod();
+		var _g = nape_phys_BodyIterator.get(_this);
+		while(true) {
+			_g.zpp_inner.zpp_inner.valmod();
+			var _this1 = _g.zpp_inner;
+			_this1.zpp_inner.valmod();
+			if(_this1.zpp_inner.zip_length) {
+				_this1.zpp_inner.zip_length = false;
+				_this1.zpp_inner.user_length = _this1.zpp_inner.inner.length;
+			}
+			var length = _this1.zpp_inner.user_length;
+			_g.zpp_critical = true;
+			var tmp;
+			if(_g.zpp_i < length) {
+				tmp = true;
+			} else {
+				_g.zpp_next = nape_phys_BodyIterator.zpp_pool;
+				nape_phys_BodyIterator.zpp_pool = _g;
+				_g.zpp_inner = null;
+				tmp = false;
+			}
+			if(!tmp) {
+				break;
+			}
+			_g.zpp_critical = false;
+			var body = _g.zpp_inner.at(_g.zpp_i++);
+			if(body.zpp_inner.type != 2) {
+				continue;
+			}
+			var _this2 = this.handJoint;
+			_this2.zpp_inner.immutable_midstep("Constraint::" + "body2");
+			var inbody2 = body == null ? null : body.zpp_inner;
+			if(inbody2 != _this2.zpp_inner_zn.b2) {
+				if(_this2.zpp_inner_zn.b2 != null) {
+					if((_this2.zpp_inner.space == null ? null : _this2.zpp_inner.space.outer) != null && _this2.zpp_inner_zn.b1 != _this2.zpp_inner_zn.b2) {
+						if(_this2.zpp_inner_zn.b2 != null) {
+							_this2.zpp_inner_zn.b2.constraints.remove(_this2.zpp_inner);
+						}
+					}
+					if(_this2.zpp_inner.active && (_this2.zpp_inner.space == null ? null : _this2.zpp_inner.space.outer) != null) {
+						_this2.zpp_inner_zn.b2.wake();
+					}
+				}
+				_this2.zpp_inner_zn.b2 = inbody2;
+				if((_this2.zpp_inner.space == null ? null : _this2.zpp_inner.space.outer) != null && inbody2 != null && _this2.zpp_inner_zn.b1 != inbody2) {
+					if(inbody2 != null) {
+						inbody2.constraints.add(_this2.zpp_inner);
+					}
+				}
+				if(_this2.zpp_inner.active && (_this2.zpp_inner.space == null ? null : _this2.zpp_inner.space.outer) != null) {
+					_this2.zpp_inner.wake();
+					if(inbody2 != null) {
+						inbody2.wake();
+					}
+				}
+			}
+			var tmp1 = _this2.zpp_inner_zn.b2 == null;
+			var _this3 = this.handJoint;
+			if(_this3.zpp_inner_zn.wrap_a2 == null) {
+				_this3.zpp_inner_zn.setup_a2();
+			}
+			var _this4 = _this3.zpp_inner_zn.wrap_a2;
+			var vector = body.worldPointToLocal(mousePoint,true);
+			if(_this4 != null && _this4.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(vector != null && vector.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this5 = _this4.zpp_inner;
+			if(_this5._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this5._isimmutable != null) {
+				_this5._isimmutable();
+			}
+			if(vector == null) {
+				throw new js__$Boot_HaxeError("Error: Cannot assign null Vec2");
+			}
+			if(vector != null && vector.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this6 = vector.zpp_inner;
+			if(_this6._validate != null) {
+				_this6._validate();
+			}
+			var x = vector.zpp_inner.x;
+			if(vector != null && vector.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this7 = vector.zpp_inner;
+			if(_this7._validate != null) {
+				_this7._validate();
+			}
+			var y = vector.zpp_inner.y;
+			if(_this4 != null && _this4.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this8 = _this4.zpp_inner;
+			if(_this8._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this8._isimmutable != null) {
+				_this8._isimmutable();
+			}
+			if(x != x || y != y) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp2;
+			if(_this4 != null && _this4.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this9 = _this4.zpp_inner;
+			if(_this9._validate != null) {
+				_this9._validate();
+			}
+			if(_this4.zpp_inner.x == x) {
+				if(_this4 != null && _this4.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this10 = _this4.zpp_inner;
+				if(_this10._validate != null) {
+					_this10._validate();
+				}
+				tmp2 = _this4.zpp_inner.y == y;
+			} else {
+				tmp2 = false;
+			}
+			if(!tmp2) {
+				_this4.zpp_inner.x = x;
+				_this4.zpp_inner.y = y;
+				var _this11 = _this4.zpp_inner;
+				if(_this11._invalidate != null) {
+					_this11._invalidate(_this11);
+				}
+			}
+			var ret = _this4;
+			if(vector.zpp_inner.weak) {
+				if(vector != null && vector.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this12 = vector.zpp_inner;
+				if(_this12._immutable) {
+					throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+				}
+				if(_this12._isimmutable != null) {
+					_this12._isimmutable();
+				}
+				if(vector.zpp_inner._inuse) {
+					throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+				}
+				var inner = vector.zpp_inner;
+				vector.zpp_inner.outer = null;
+				vector.zpp_inner = null;
+				var o = vector;
+				o.zpp_pool = null;
+				if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+					zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o;
+				} else {
+					zpp_$nape_util_ZPP_$PubPool.poolVec2 = o;
+				}
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = o;
+				o.zpp_disp = true;
+				var o1 = inner;
+				if(o1.outer != null) {
+					o1.outer.zpp_inner = null;
+					o1.outer = null;
+				}
+				o1._isimmutable = null;
+				o1._validate = null;
+				o1._invalidate = null;
+				o1.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o1;
+			}
+			var _this13 = this.handJoint;
+			if(_this13.zpp_inner.active != true) {
+				if(_this13.zpp_inner.component != null) {
+					_this13.zpp_inner.component.woken = false;
+				}
+				_this13.zpp_inner.clearcache();
+				_this13.zpp_inner.active = true;
+				_this13.zpp_inner.activate();
+				if(_this13.zpp_inner.space != null) {
+					if(_this13.zpp_inner.component != null) {
+						_this13.zpp_inner.component.sleeping = true;
+					}
+					_this13.zpp_inner.space.wake_constraint(_this13.zpp_inner,true);
+				}
+			}
+			break;
+		}
+		if(mousePoint != null && mousePoint.zpp_disp) {
+			throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+		}
+		var _this14 = mousePoint.zpp_inner;
+		if(_this14._immutable) {
+			throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+		}
+		if(_this14._isimmutable != null) {
+			_this14._isimmutable();
+		}
+		if(mousePoint.zpp_inner._inuse) {
+			throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+		}
+		var inner1 = mousePoint.zpp_inner;
+		mousePoint.zpp_inner.outer = null;
+		mousePoint.zpp_inner = null;
+		var o2 = mousePoint;
+		o2.zpp_pool = null;
+		if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+			zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o2;
+		} else {
+			zpp_$nape_util_ZPP_$PubPool.poolVec2 = o2;
+		}
+		zpp_$nape_util_ZPP_$PubPool.nextVec2 = o2;
+		o2.zpp_disp = true;
+		var o3 = inner1;
+		if(o3.outer != null) {
+			o3.outer.zpp_inner = null;
+			o3.outer = null;
+		}
+		o3._isimmutable = null;
+		o3._validate = null;
+		o3._invalidate = null;
+		o3.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+		zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o3;
+	}
+	,mouseMoveHandler: function(ev) {
+		this.mouseX = ev.screenX;
+		this.mouseY = ev.screenY;
+	}
+	,mouseUpHandler: function(ev) {
+		var _this = this.handJoint;
+		if(_this.zpp_inner.active != false) {
+			if(_this.zpp_inner.component != null) {
+				_this.zpp_inner.component.woken = false;
+			}
+			_this.zpp_inner.clearcache();
+			if(_this.zpp_inner.space != null) {
+				_this.zpp_inner.wake();
+				_this.zpp_inner.space.live_constraints.remove(_this.zpp_inner);
+			}
+			_this.zpp_inner.active = false;
+			_this.zpp_inner.deactivate();
+		}
+		console.log("mouse up");
 	}
 	,keyDownHandler: function(ev) {
-		if(ev.keyCode == 82) {
-			this.space.clear();
-			this.setUp();
+		this.directed = true;
+		console.log("keyDown");
+		if(ev.key == "ArrowDown") {
+			var _this = this.space.zpp_inner.wrap_bodies.at(5);
+			var velocity = new nape_geom_Vec2(0,15);
+			if(velocity != null && velocity.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity == null) {
+				throw new js__$Boot_HaxeError("Error: Body::" + "velocity" + " cannot be null");
+			}
+			if(_this.zpp_inner.wrap_vel == null) {
+				_this.zpp_inner.setupVelocity();
+			}
+			var _this1 = _this.zpp_inner.wrap_vel;
+			if(_this1 != null && _this1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity != null && velocity.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this2 = _this1.zpp_inner;
+			if(_this2._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this2._isimmutable != null) {
+				_this2._isimmutable();
+			}
+			if(velocity == null) {
+				throw new js__$Boot_HaxeError("Error: Cannot assign null Vec2");
+			}
+			if(velocity != null && velocity.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this3 = velocity.zpp_inner;
+			if(_this3._validate != null) {
+				_this3._validate();
+			}
+			var x = velocity.zpp_inner.x;
+			if(velocity != null && velocity.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this4 = velocity.zpp_inner;
+			if(_this4._validate != null) {
+				_this4._validate();
+			}
+			var y = velocity.zpp_inner.y;
+			if(_this1 != null && _this1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this5 = _this1.zpp_inner;
+			if(_this5._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this5._isimmutable != null) {
+				_this5._isimmutable();
+			}
+			if(x != x || y != y) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp;
+			if(_this1 != null && _this1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this6 = _this1.zpp_inner;
+			if(_this6._validate != null) {
+				_this6._validate();
+			}
+			if(_this1.zpp_inner.x == x) {
+				if(_this1 != null && _this1.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this7 = _this1.zpp_inner;
+				if(_this7._validate != null) {
+					_this7._validate();
+				}
+				tmp = _this1.zpp_inner.y == y;
+			} else {
+				tmp = false;
+			}
+			if(!tmp) {
+				_this1.zpp_inner.x = x;
+				_this1.zpp_inner.y = y;
+				var _this8 = _this1.zpp_inner;
+				if(_this8._invalidate != null) {
+					_this8._invalidate(_this8);
+				}
+			}
+			var ret = _this1;
+			if(velocity.zpp_inner.weak) {
+				if(velocity != null && velocity.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this9 = velocity.zpp_inner;
+				if(_this9._immutable) {
+					throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+				}
+				if(_this9._isimmutable != null) {
+					_this9._isimmutable();
+				}
+				if(velocity.zpp_inner._inuse) {
+					throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+				}
+				var inner = velocity.zpp_inner;
+				velocity.zpp_inner.outer = null;
+				velocity.zpp_inner = null;
+				var o = velocity;
+				o.zpp_pool = null;
+				if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+					zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o;
+				} else {
+					zpp_$nape_util_ZPP_$PubPool.poolVec2 = o;
+				}
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = o;
+				o.zpp_disp = true;
+				var o1 = inner;
+				if(o1.outer != null) {
+					o1.outer.zpp_inner = null;
+					o1.outer = null;
+				}
+				o1._isimmutable = null;
+				o1._validate = null;
+				o1._invalidate = null;
+				o1.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o1;
+			}
+			if(_this.zpp_inner.wrap_vel == null) {
+				_this.zpp_inner.setupVelocity();
+			}
+		}
+		if(ev.key == "ArrowUp") {
+			var _this10 = this.space.zpp_inner.wrap_bodies.at(5);
+			var velocity1 = new nape_geom_Vec2(0,-15);
+			if(velocity1 != null && velocity1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity1 == null) {
+				throw new js__$Boot_HaxeError("Error: Body::" + "velocity" + " cannot be null");
+			}
+			if(_this10.zpp_inner.wrap_vel == null) {
+				_this10.zpp_inner.setupVelocity();
+			}
+			var _this11 = _this10.zpp_inner.wrap_vel;
+			if(_this11 != null && _this11.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity1 != null && velocity1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this12 = _this11.zpp_inner;
+			if(_this12._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this12._isimmutable != null) {
+				_this12._isimmutable();
+			}
+			if(velocity1 == null) {
+				throw new js__$Boot_HaxeError("Error: Cannot assign null Vec2");
+			}
+			if(velocity1 != null && velocity1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this13 = velocity1.zpp_inner;
+			if(_this13._validate != null) {
+				_this13._validate();
+			}
+			var x1 = velocity1.zpp_inner.x;
+			if(velocity1 != null && velocity1.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this14 = velocity1.zpp_inner;
+			if(_this14._validate != null) {
+				_this14._validate();
+			}
+			var y1 = velocity1.zpp_inner.y;
+			if(_this11 != null && _this11.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this15 = _this11.zpp_inner;
+			if(_this15._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this15._isimmutable != null) {
+				_this15._isimmutable();
+			}
+			if(x1 != x1 || y1 != y1) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp1;
+			if(_this11 != null && _this11.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this16 = _this11.zpp_inner;
+			if(_this16._validate != null) {
+				_this16._validate();
+			}
+			if(_this11.zpp_inner.x == x1) {
+				if(_this11 != null && _this11.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this17 = _this11.zpp_inner;
+				if(_this17._validate != null) {
+					_this17._validate();
+				}
+				tmp1 = _this11.zpp_inner.y == y1;
+			} else {
+				tmp1 = false;
+			}
+			if(!tmp1) {
+				_this11.zpp_inner.x = x1;
+				_this11.zpp_inner.y = y1;
+				var _this18 = _this11.zpp_inner;
+				if(_this18._invalidate != null) {
+					_this18._invalidate(_this18);
+				}
+			}
+			var ret1 = _this11;
+			if(velocity1.zpp_inner.weak) {
+				if(velocity1 != null && velocity1.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this19 = velocity1.zpp_inner;
+				if(_this19._immutable) {
+					throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+				}
+				if(_this19._isimmutable != null) {
+					_this19._isimmutable();
+				}
+				if(velocity1.zpp_inner._inuse) {
+					throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+				}
+				var inner1 = velocity1.zpp_inner;
+				velocity1.zpp_inner.outer = null;
+				velocity1.zpp_inner = null;
+				var o2 = velocity1;
+				o2.zpp_pool = null;
+				if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+					zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o2;
+				} else {
+					zpp_$nape_util_ZPP_$PubPool.poolVec2 = o2;
+				}
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = o2;
+				o2.zpp_disp = true;
+				var o3 = inner1;
+				if(o3.outer != null) {
+					o3.outer.zpp_inner = null;
+					o3.outer = null;
+				}
+				o3._isimmutable = null;
+				o3._validate = null;
+				o3._invalidate = null;
+				o3.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o3;
+			}
+			if(_this10.zpp_inner.wrap_vel == null) {
+				_this10.zpp_inner.setupVelocity();
+			}
+		}
+		if(ev.key == "ArrowRight") {
+			var _this20 = this.space.zpp_inner.wrap_bodies.at(5);
+			var velocity2 = new nape_geom_Vec2(15,0);
+			if(velocity2 != null && velocity2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity2 == null) {
+				throw new js__$Boot_HaxeError("Error: Body::" + "velocity" + " cannot be null");
+			}
+			if(_this20.zpp_inner.wrap_vel == null) {
+				_this20.zpp_inner.setupVelocity();
+			}
+			var _this21 = _this20.zpp_inner.wrap_vel;
+			if(_this21 != null && _this21.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity2 != null && velocity2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this22 = _this21.zpp_inner;
+			if(_this22._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this22._isimmutable != null) {
+				_this22._isimmutable();
+			}
+			if(velocity2 == null) {
+				throw new js__$Boot_HaxeError("Error: Cannot assign null Vec2");
+			}
+			if(velocity2 != null && velocity2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this23 = velocity2.zpp_inner;
+			if(_this23._validate != null) {
+				_this23._validate();
+			}
+			var x2 = velocity2.zpp_inner.x;
+			if(velocity2 != null && velocity2.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this24 = velocity2.zpp_inner;
+			if(_this24._validate != null) {
+				_this24._validate();
+			}
+			var y2 = velocity2.zpp_inner.y;
+			if(_this21 != null && _this21.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this25 = _this21.zpp_inner;
+			if(_this25._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this25._isimmutable != null) {
+				_this25._isimmutable();
+			}
+			if(x2 != x2 || y2 != y2) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp2;
+			if(_this21 != null && _this21.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this26 = _this21.zpp_inner;
+			if(_this26._validate != null) {
+				_this26._validate();
+			}
+			if(_this21.zpp_inner.x == x2) {
+				if(_this21 != null && _this21.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this27 = _this21.zpp_inner;
+				if(_this27._validate != null) {
+					_this27._validate();
+				}
+				tmp2 = _this21.zpp_inner.y == y2;
+			} else {
+				tmp2 = false;
+			}
+			if(!tmp2) {
+				_this21.zpp_inner.x = x2;
+				_this21.zpp_inner.y = y2;
+				var _this28 = _this21.zpp_inner;
+				if(_this28._invalidate != null) {
+					_this28._invalidate(_this28);
+				}
+			}
+			var ret2 = _this21;
+			if(velocity2.zpp_inner.weak) {
+				if(velocity2 != null && velocity2.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this29 = velocity2.zpp_inner;
+				if(_this29._immutable) {
+					throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+				}
+				if(_this29._isimmutable != null) {
+					_this29._isimmutable();
+				}
+				if(velocity2.zpp_inner._inuse) {
+					throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+				}
+				var inner2 = velocity2.zpp_inner;
+				velocity2.zpp_inner.outer = null;
+				velocity2.zpp_inner = null;
+				var o4 = velocity2;
+				o4.zpp_pool = null;
+				if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+					zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o4;
+				} else {
+					zpp_$nape_util_ZPP_$PubPool.poolVec2 = o4;
+				}
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = o4;
+				o4.zpp_disp = true;
+				var o5 = inner2;
+				if(o5.outer != null) {
+					o5.outer.zpp_inner = null;
+					o5.outer = null;
+				}
+				o5._isimmutable = null;
+				o5._validate = null;
+				o5._invalidate = null;
+				o5.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o5;
+			}
+			if(_this20.zpp_inner.wrap_vel == null) {
+				_this20.zpp_inner.setupVelocity();
+			}
+		}
+		if(ev.key == "ArrowLeft") {
+			var _this30 = this.space.zpp_inner.wrap_bodies.at(5);
+			var velocity3 = new nape_geom_Vec2(-15,0);
+			if(velocity3 != null && velocity3.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity3 == null) {
+				throw new js__$Boot_HaxeError("Error: Body::" + "velocity" + " cannot be null");
+			}
+			if(_this30.zpp_inner.wrap_vel == null) {
+				_this30.zpp_inner.setupVelocity();
+			}
+			var _this31 = _this30.zpp_inner.wrap_vel;
+			if(_this31 != null && _this31.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			if(velocity3 != null && velocity3.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this32 = _this31.zpp_inner;
+			if(_this32._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this32._isimmutable != null) {
+				_this32._isimmutable();
+			}
+			if(velocity3 == null) {
+				throw new js__$Boot_HaxeError("Error: Cannot assign null Vec2");
+			}
+			if(velocity3 != null && velocity3.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this33 = velocity3.zpp_inner;
+			if(_this33._validate != null) {
+				_this33._validate();
+			}
+			var x3 = velocity3.zpp_inner.x;
+			if(velocity3 != null && velocity3.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this34 = velocity3.zpp_inner;
+			if(_this34._validate != null) {
+				_this34._validate();
+			}
+			var y3 = velocity3.zpp_inner.y;
+			if(_this31 != null && _this31.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this35 = _this31.zpp_inner;
+			if(_this35._immutable) {
+				throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+			}
+			if(_this35._isimmutable != null) {
+				_this35._isimmutable();
+			}
+			if(x3 != x3 || y3 != y3) {
+				throw new js__$Boot_HaxeError("Error: Vec2 components cannot be NaN");
+			}
+			var tmp3;
+			if(_this31 != null && _this31.zpp_disp) {
+				throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+			}
+			var _this36 = _this31.zpp_inner;
+			if(_this36._validate != null) {
+				_this36._validate();
+			}
+			if(_this31.zpp_inner.x == x3) {
+				if(_this31 != null && _this31.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this37 = _this31.zpp_inner;
+				if(_this37._validate != null) {
+					_this37._validate();
+				}
+				tmp3 = _this31.zpp_inner.y == y3;
+			} else {
+				tmp3 = false;
+			}
+			if(!tmp3) {
+				_this31.zpp_inner.x = x3;
+				_this31.zpp_inner.y = y3;
+				var _this38 = _this31.zpp_inner;
+				if(_this38._invalidate != null) {
+					_this38._invalidate(_this38);
+				}
+			}
+			var ret3 = _this31;
+			if(velocity3.zpp_inner.weak) {
+				if(velocity3 != null && velocity3.zpp_disp) {
+					throw new js__$Boot_HaxeError("Error: " + "Vec2" + " has been disposed and cannot be used!");
+				}
+				var _this39 = velocity3.zpp_inner;
+				if(_this39._immutable) {
+					throw new js__$Boot_HaxeError("Error: Vec2 is immutable");
+				}
+				if(_this39._isimmutable != null) {
+					_this39._isimmutable();
+				}
+				if(velocity3.zpp_inner._inuse) {
+					throw new js__$Boot_HaxeError("Error: This Vec2 is not disposable");
+				}
+				var inner3 = velocity3.zpp_inner;
+				velocity3.zpp_inner.outer = null;
+				velocity3.zpp_inner = null;
+				var o6 = velocity3;
+				o6.zpp_pool = null;
+				if(zpp_$nape_util_ZPP_$PubPool.nextVec2 != null) {
+					zpp_$nape_util_ZPP_$PubPool.nextVec2.zpp_pool = o6;
+				} else {
+					zpp_$nape_util_ZPP_$PubPool.poolVec2 = o6;
+				}
+				zpp_$nape_util_ZPP_$PubPool.nextVec2 = o6;
+				o6.zpp_disp = true;
+				var o7 = inner3;
+				if(o7.outer != null) {
+					o7.outer.zpp_inner = null;
+					o7.outer = null;
+				}
+				o7._isimmutable = null;
+				o7._validate = null;
+				o7._invalidate = null;
+				o7.next = zpp_$nape_geom_ZPP_$Vec2.zpp_pool;
+				zpp_$nape_geom_ZPP_$Vec2.zpp_pool = o7;
+			}
+			if(_this30.zpp_inner.wrap_vel == null) {
+				_this30.zpp_inner.setupVelocity();
+			}
 		}
 	}
-	,__class__: Main
+	,__class__: FixedDragging
 };
 Math.__name__ = true;
 var Reflect = function() { };
@@ -120432,6 +121279,8 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;
@@ -120717,5 +121566,5 @@ zpp_$nape_util_ZPP_$ShapeList.internal = false;
 zpp_$nape_util_ZPP_$InteractionGroupList.internal = false;
 zpp_$nape_util_ZPP_$ArbiterList.internal = false;
 zpp_$nape_util_ZPP_$ContactList.internal = false;
-Main.main();
+FixedDragging.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
