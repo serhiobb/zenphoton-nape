@@ -79,7 +79,6 @@ class FixedDragging {
     }
 
     function new() {
-        
         i = 0;
         log = 0;
         currentBodyIndex = 0;
@@ -92,9 +91,7 @@ class FixedDragging {
         document.onreadystatechange = documentOnload;
         //body = cast document.createElement('body');
         //document.appendChild(body);
-        
-
-        
+               
         window.requestAnimationFrame(enterFrameHandler);
         canvas = cast document.createElement('canvas');
         canvas.style.display = 'none';
@@ -131,9 +128,6 @@ class FixedDragging {
         // debug.drawConstraints = true;
  
         setUp();
- 
-        
-        
         
         // stage.addEventListener(Event.ENTER_FRAME, enterFrameHandler);
     }
@@ -151,7 +145,7 @@ class FixedDragging {
         border.space = space;
  
         // Generate some random objects!
-        for (i in 0...50) {
+        for (i in 0...64) {
             var body = new Body();
  
             // Add random one of either a Circle, Box or Pentagon.
@@ -242,10 +236,6 @@ class FixedDragging {
         i = i + 1;
         // trace(i);
         
-        
-
-        
-
         var _ctx = ctx;
 
         ctx.fillStyle = '#FFFFFF';
@@ -269,24 +259,24 @@ class FixedDragging {
             if (preserveComma) {
                 comma = ' , ';
             }
-            debugBodiesPosition = debugBodiesPosition  + ' [ ' + obj.bounds.x + ' , '+ obj.bounds.y + ' ] ' + comma + '';
+            debugBodiesPosition = debugBodiesPosition  + ' [ ' + obj.bounds.x + ' , '+ obj.bounds.y + ' , ' + obj.bounds.width + ' , ' + obj.bounds.height + ' ] ' + comma + '';
                     // renderLine(obj.bounds.x, obj.bounds.y, obj.bounds.x + 10, obj.bounds.y+10);
             
             // trace(ctx);
             // trace(obj.type.toString());
-            // if(obj.type.toString() == 'DYNAMIC'){
-            //         ctx.fillStyle = '#000000';
-            //         if(currentBodyIndex == playerBodyIndex){
-            //             ctx.fillStyle = '#0000FF';    
-            //         }
-            //         ctx.lineWidth = 10;
-            //         ctx.beginPath();
-            //         // ctx.moveTo(obj.bounds.x, obj.bounds.y);        
-            //         ctx.fillRect(obj.bounds.x, obj.bounds.y, obj.bounds.width, obj.bounds.height);
-            //         ctx.closePath();
-            //         ctx.stroke();
-            //         // ctx.fillPath();
-            // }
+            if(obj.type.toString() == 'DYNAMIC'){
+                    ctx.fillStyle = '#000000';
+                    if(currentBodyIndex == playerBodyIndex){
+                        ctx.fillStyle = '#0000FF';    
+                    }
+                    ctx.lineWidth = 10;
+                    ctx.beginPath();
+                    // ctx.moveTo(obj.bounds.x, obj.bounds.y);        
+                    ctx.fillRect(obj.bounds.x, obj.bounds.y, obj.bounds.width, obj.bounds.height);
+                    ctx.closePath();
+                    ctx.stroke();
+                    // ctx.fillPath();
+            }
             // trace(currentBodyIndex);
         });
         if(log == 0){

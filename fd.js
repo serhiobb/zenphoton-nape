@@ -104,7 +104,7 @@ FixedDragging.prototype = {
 		}
 		var tmp = border.zpp_inner.space == null;
 		var _g = 0;
-		while(_g < 50) {
+		while(_g < 64) {
 			var i = _g++;
 			var body = new nape_phys_Body();
 			if(Math.random() < 0.33) {
@@ -499,7 +499,76 @@ FixedDragging.prototype = {
 			if(_this12._validate != null) {
 				_this12._validate();
 			}
-			_gthis.debugBodiesPosition = renderObj2 + _this11.zpp_inner.miny + " ] " + comma + "";
+			var renderObj3 = renderObj2 + _this11.zpp_inner.miny + " , ";
+			if(obj.zpp_inner.world) {
+				throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+			}
+			var _this13 = obj.zpp_inner.aabb.wrapper();
+			var _this14 = _this13.zpp_inner;
+			if(_this14._validate != null) {
+				_this14._validate();
+			}
+			var _this15 = _this13.zpp_inner;
+			var renderObj4 = renderObj3 + (_this15.maxx - _this15.minx) + " , ";
+			if(obj.zpp_inner.world) {
+				throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+			}
+			var _this16 = obj.zpp_inner.aabb.wrapper();
+			var _this17 = _this16.zpp_inner;
+			if(_this17._validate != null) {
+				_this17._validate();
+			}
+			var _this18 = _this16.zpp_inner;
+			_gthis.debugBodiesPosition = renderObj4 + (_this18.maxy - _this18.miny) + " ] " + comma + "";
+			if(zpp_$nape_phys_ZPP_$Body.types[obj.zpp_inner.type].toString() == "DYNAMIC") {
+				_gthis.ctx.fillStyle = "#000000";
+				if(_gthis.currentBodyIndex == _gthis.playerBodyIndex) {
+					_gthis.ctx.fillStyle = "#0000FF";
+				}
+				_gthis.ctx.lineWidth = 10;
+				_gthis.ctx.beginPath();
+				var _gthis3 = _gthis.ctx;
+				if(obj.zpp_inner.world) {
+					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+				}
+				var _this19 = obj.zpp_inner.aabb.wrapper();
+				var _this20 = _this19.zpp_inner;
+				if(_this20._validate != null) {
+					_this20._validate();
+				}
+				var renderObj5 = _this19.zpp_inner.minx;
+				if(obj.zpp_inner.world) {
+					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+				}
+				var _this21 = obj.zpp_inner.aabb.wrapper();
+				var _this22 = _this21.zpp_inner;
+				if(_this22._validate != null) {
+					_this22._validate();
+				}
+				var renderObj6 = _this21.zpp_inner.miny;
+				if(obj.zpp_inner.world) {
+					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+				}
+				var _this23 = obj.zpp_inner.aabb.wrapper();
+				var _this24 = _this23.zpp_inner;
+				if(_this24._validate != null) {
+					_this24._validate();
+				}
+				var _this25 = _this23.zpp_inner;
+				var renderObj7 = _this25.maxx - _this25.minx;
+				if(obj.zpp_inner.world) {
+					throw new js__$Boot_HaxeError("Error: Space::world has no bounds");
+				}
+				var _this26 = obj.zpp_inner.aabb.wrapper();
+				var _this27 = _this26.zpp_inner;
+				if(_this27._validate != null) {
+					_this27._validate();
+				}
+				var _this28 = _this26.zpp_inner;
+				_gthis3.fillRect(renderObj5,renderObj6,renderObj7,_this28.maxy - _this28.miny);
+				_gthis.ctx.closePath();
+				_gthis.ctx.stroke();
+			}
 		};
 		var lambda = renderObj;
 		if(lambda == null) {
@@ -509,13 +578,13 @@ FixedDragging.prototype = {
 		var it = nape_phys_BodyIterator.get(_this6);
 		while(true) {
 			it.zpp_inner.zpp_inner.valmod();
-			var _this13 = it.zpp_inner;
-			_this13.zpp_inner.valmod();
-			if(_this13.zpp_inner.zip_length) {
-				_this13.zpp_inner.zip_length = false;
-				_this13.zpp_inner.user_length = _this13.zpp_inner.inner.length;
+			var _this29 = it.zpp_inner;
+			_this29.zpp_inner.valmod();
+			if(_this29.zpp_inner.zip_length) {
+				_this29.zpp_inner.zip_length = false;
+				_this29.zpp_inner.user_length = _this29.zpp_inner.inner.length;
 			}
-			var length = _this13.zpp_inner.user_length;
+			var length = _this29.zpp_inner.user_length;
 			it.zpp_critical = true;
 			var tmp1;
 			if(it.zpp_i < length) {
@@ -540,18 +609,18 @@ FixedDragging.prototype = {
 			}
 		}
 		if(this.log == 0) {
-			var _this14 = this.space.zpp_inner.wrap_bodies;
-			_this14.zpp_inner.valmod();
-			var it1 = nape_phys_BodyIterator.get(_this14);
+			var _this30 = this.space.zpp_inner.wrap_bodies;
+			_this30.zpp_inner.valmod();
+			var it1 = nape_phys_BodyIterator.get(_this30);
 			while(true) {
 				it1.zpp_inner.zpp_inner.valmod();
-				var _this15 = it1.zpp_inner;
-				_this15.zpp_inner.valmod();
-				if(_this15.zpp_inner.zip_length) {
-					_this15.zpp_inner.zip_length = false;
-					_this15.zpp_inner.user_length = _this15.zpp_inner.inner.length;
+				var _this31 = it1.zpp_inner;
+				_this31.zpp_inner.valmod();
+				if(_this31.zpp_inner.zip_length) {
+					_this31.zpp_inner.zip_length = false;
+					_this31.zpp_inner.user_length = _this31.zpp_inner.inner.length;
 				}
-				var length1 = _this15.zpp_inner.user_length;
+				var length1 = _this31.zpp_inner.user_length;
 				it1.zpp_critical = true;
 				var tmp2;
 				if(it1.zpp_i < length1) {
